@@ -17,8 +17,8 @@ let studentSchema = new mongoose.Schema(
         {
             type: Number,
             required: true,
-            min:[18,"Minimum age should be 18 and you entred {VALUE}"],
-            max:[30,"Maximum age should be 30 and you entred {VALUE}"]    
+            min:[10,"Minimum age should be 18 and you entred {VALUE}"],
+            max:[60,"Maximum age should be 30 and you entred {VALUE}"]    
         },
         gender:
         {
@@ -34,9 +34,20 @@ let studentSchema = new mongoose.Schema(
             type:String,
             required:true,
             unique:true
+        },
+        fees:{
+            type:Number,
+            required:true
+        },
+        marks:{
+            type:Number,
+            required:true
+        },
+        createdAt:{
+            type:Date,
+            default:Date.now()
         }
     },
-    {timestamps:true}
 )
 
 

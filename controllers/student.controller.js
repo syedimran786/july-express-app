@@ -2,6 +2,8 @@
 let Student = require("../models/student.model");
 const Joi = require('joi');
 
+const jwt = require('jsonwebtoken')
+
 
 let studentSchema = Joi.object({
     name: Joi.string().min(4).required().messages({
@@ -12,16 +14,20 @@ let studentSchema = Joi.object({
     }),
     age: Joi.number().required(),
     gender: Joi.string().required(),
-    email: Joi.string().required().email()
+    email: Joi.string().required().email(),
+    fees: Joi.number().required(),
+    marks: Joi.number().required()
+
 })
 
 //! Adding Student
 
 let createStudent = async (req, res, next) => {
     try {
-        let { name, age, gender, email } = req.body
+        let { name, age, gender, email ,fees,marks} = req.body
+        console.log({name, age, gender, email ,fees,marks})
 
-        let {value,error}=studentSchema.validate({name, age, gender, email})
+        let {value,error}=studentSchema.validate({name, age, gender, email,fees,marks})
 
         console.log(value)
         console.log("--------------------------")
@@ -46,9 +52,74 @@ else
 
 
 let getStudents = async (req, res, next) => {
-    let allStudents = await Student.find();
-    res.status(200).json({ error: false, message: "Students Fetched Successfully", data: allStudents })
+  try
+  {
+    let {gender,studentname,fees,sort,fields,page,limit}=req.query;
+   
+    let queryObject={}
 
+    if(gender)
+    {
+        queryObject.gender=gender
+    }
+
+    if(studentname)
+    {
+        //! getting all the students whose name is equal to studentname
+        // queryObject.name=studentname;
+        //! getting all the students whose name includes studentname
+        queryObject.name={$regex:studentname,$options:"i"}
+    }
+
+    if(fees)
+    {
+        queryObject.fees=Number(fees)
+    }
+
+
+   
+    //! Dont use await keyword because it wauts till it gets the response and it allows if else block to excecute
+    let allStudents =Student.find(queryObject);
+
+    if(sort)
+    {
+        allStudents=allStudents.sort(sort);
+    }
+    else
+    {
+        allStudents=allStudents.sort("age")
+    }
+
+    if(fields)
+    {
+        
+        let splittedFields=fields.split(",").join(" ")
+        allStudents=allStudents.select(splittedFields+" -_id")
+    }
+
+    if(!page && !limit)
+    {
+        allStudents=await allStudents
+        res.status(200).json({count:allStudents.length,error: false, 
+            message: "Students Fetched Successfully", data: allStudents })
+    
+    }
+//! Pagination starts
+let newPage=page || 1;
+let newLimit=limit || 4;
+// let newskip=(newPage-1)*4
+let newskip=(newPage-1)*newLimit
+
+//! Pagination Ends
+    allStudents=await allStudents.skip(newskip).limit(newLimit)
+    res.status(200).json({count:allStudents.length,error: false, 
+        message: "Students Fetched Successfully", data: allStudents })
+
+  }
+  catch(err)
+  {
+    next(err)
+  }
 }
 
 //! getting one stundet
@@ -74,11 +145,13 @@ let getOnStudent = async (req, res, next) => {
 //! Updating Student
 
 let editStudent = async (req, res, next) => {
-    // let {name,age,gender}=req.body;
+    try
+    {
+        // let {name,age,gender}=req.body;
     let { name } = req.body;
 
     let { sid } = req.params
-
+    
     let singleStudent = await Student.findById(sid);
 
     //! Checking whether student is avaialble or not
@@ -95,7 +168,13 @@ let editStudent = async (req, res, next) => {
     console.log(req.body)
     console.log(req.params)
 
-    res.status(200).json({ error: false, message: `${updatedStudent.name.toUpperCase()} age Updated from ${singleStudent.age} to ${updatedStudent.age} Successfully`, data: updatedStudent })
+    res.status(200).json({ error: false, message: `${updatedStudent.name.toUpperCase()} age Updated from ${singleStudent.age} to ${updatedStudent.age} Successfully`, data: updatedStudent,
+updatedBy:data.email })
+    }
+    catch(err)
+    {
+        next(err)
+    }
 }
 
 

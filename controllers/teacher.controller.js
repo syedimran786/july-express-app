@@ -1,6 +1,7 @@
 const { invitaionMail } = require('../helpers/mailHelper');
 const Teacher = require('../models/teacher.model');
-
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
 
 
 let registerTeacher=async (req,res,next)=>
@@ -52,7 +53,9 @@ let logoinTeacher=async (req,res,next)=>
 
         if(hashedPassword)
         {
-            return res.status(201).json({error:false,message:"Login Successfull"})
+            let token=jwt.sign({email:isTeacherAvailable.email,name:isTeacherAvailable.name}, 
+                process.env.JWT_KEY,{expiresIn:process.env.JWT_EXPIRESIN})
+            return res.status(201).json({error:false,message:"Login Successfull",token})
         }
         else
         {
@@ -68,8 +71,23 @@ let logoinTeacher=async (req,res,next)=>
     }
 }
 
+let getAllTeachers=async (req,res,next)=>
+{
+    try
+    {
+        let teachers=await Teacher.find({},{_id:0});
+        return res.status(200).json({error:false,message:"Teachers Fetched Successfully",
+        data:teachers,user:data.name})
+    }
+    catch(err)
+    {
+        next(err)
+    }
+}
+
 module.exports=
 {
     registerTeacher,
-    logoinTeacher
+    logoinTeacher,
+    getAllTeachers
 }
