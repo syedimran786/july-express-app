@@ -96,11 +96,10 @@ let getStudents = async (req, res, next) => {
         let splittedFields=fields.split(",").join(" ")
         allStudents=allStudents.select(splittedFields+" -_id")
     }
-
     if(!page && !limit)
     {
         allStudents=await allStudents
-        res.status(200).json({count:allStudents.length,error: false, 
+        return res.status(200).json({count:allStudents.length,error: false, 
             message: "Students Fetched Successfully", data: allStudents })
     
     }
