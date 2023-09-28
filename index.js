@@ -5,12 +5,17 @@ const StudentRoutes = require('./routes/student.routes');
 const teacherRoutes = require('./routes/teacher.routes');
 const userRoutes = require('./routes/user.routes');
 const aluminiRoutes = require('./routes/alumini.routes');
+const taskRoutes = require('./routes/task.routes');
+const cors = require('cors')
+
 
 
 
 
 console.log("hello")
 let app=express();
+
+app.use(cors())
 
 //! It is used to accept json data from the req body
 app.use(express.json())
@@ -29,6 +34,9 @@ app.use("/api/user",userRoutes)
 
 //? Alumini Routes
 app.use("/api/alumini",aluminiRoutes)
+
+//? Task routes
+app.use("/api/task",taskRoutes)
 
 
 //! Page Not Found Middleware

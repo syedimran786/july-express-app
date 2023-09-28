@@ -6,6 +6,7 @@ let auth=async (req,res,next)=>
     {
         //! if there is token it returns a token prefixed with bearer else returns undefined
         let authToken=req.headers.authorization;
+        console.log(authToken)
 
         if(!authToken || !authToken.startsWith("Bearer"))
         {
@@ -14,9 +15,9 @@ let auth=async (req,res,next)=>
         //! getting the token without Bearer
         let token=authToken.split(" ")[1];
         let decodedData=jwt.verify(token, process.env.JWT_KEY);
-        let {email,name}=decodedData;
+        let {email,name,_id}=decodedData;
 
-        req.user={email,name}
+        req.user={email,name,_id}
 
         next()
     }

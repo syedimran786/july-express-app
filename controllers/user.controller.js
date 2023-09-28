@@ -2,6 +2,7 @@ const { invitaionMail, sendOtp } = require('../helpers/mailHelper');
 const { createOtp } = require('../helpers/otpHelper');
 const User = require('../models/user.model')
 const bcryptjs = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 
 let createUser=async (req,res,next)=>
@@ -76,7 +77,11 @@ let userVerification=async (req,res,next)=>
 
         if(isTrue)
         {
-            return res.status(200).json({error:false,message:"OTP Verified Successfully"})
+            let token=jwt.sign({email:isUserAvailable.email,name:isUserAvailable.fullname,
+                _id:isUserAvailable._id}, 
+                process.env.JWT_KEY,{expiresIn:process.env.JWT_EXPIRESIN})
+            return res.status(201).json({error:false,message:"Login Successfull",token})
+            // return res.status(200).json({error:false,message:"OTP Verified Successfully"})
         }
 
         return res.status(500).json({error:true,message:"OTP Verification Failed!!!!"})
